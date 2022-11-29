@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{name}}</title>
+</head>
+<style>
+    body {
+        font-family: Verdana, sans-serif
+    }
+    td {
+        border: 1px solid;
+        margin: 0;
+        padding: 5px;
+    }
+    img {
+        width: 100%;
+    }
+    .first {
+        width: 100%;
+    }
+    table {
+        border-collapse: collapse;
+    }
+    .title {
+        font-weight: bold;
+    }
+    .grid_tables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 015px;
+    }
+</style>
+<body style="text-align: center">
+    <h1 style="text-align: center">Аналитика по зарплатам и городам для профессии {{ name }}</h1>
+    <img src="{{path}}"><br>
+    <table class="first">
+        <h2>Статистика по годам</h2>
+            <tr class="title">
+                <td>Год</td>
+                <td>Средняя зарплата</td>
+                <td>Средняя зарплата - {{ name }}</td>
+                <td>Количество вакансий</td>
+                <td>Количество вакансий - {{ name }}</td>
+            </tr>
+        {% for item in stats %}
+            <tr>
+               <td>{{item[0]}}</td>
+               <td>{{item[1]}}</td>
+               <td>{{item[2]}}</td>
+               <td>{{item[3]}}</td>
+               <td>{{item[4]}}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+    <h2>Статистика по городам</h2>
+    <div style="width: 100%;">
+            <table style="display: inline-block; float: left; margin-right: 015px; margin-left: 095px">
+                <tr class="title">
+                    <td>Город</td>
+                    <td>Уровень зарплат</td>
+                </tr>
+                {% for item in stats5 %}
+                <tr>
+                    <td>{{item}}</td>
+                    <td>{{stats5[item]}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <table style="display: inline-block; float: left">
+                <tr class="title">
+                    <td>Город</td>
+                    <td>Уровень зарплат</td>
+                </tr>
+                {% for item in stats6 %}
+                <tr>
+                    <td>{{item}}</td>
+                    <td>{{stats6[item]}}%</td>
+                </tr>
+                {% endfor %}
+            </table>
+    </div>
+</body>
+</html>
