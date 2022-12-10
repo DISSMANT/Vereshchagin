@@ -11,12 +11,30 @@ import pdfkit
 
 
 class Vacancy:
+    """
+    Класс для вакансии
+
+    Attributes:
+        name (str): Название вакансии
+        salary_currency (str): Валюта зарплаты
+        salary_from (int): Зарплата ОТ
+        salary_to (int): Зарплата ДО
+        area_name (str): Локация
+        year (int): Год выкладки вакансии
+        salary_average (int): Средняя зарплата
+    """
     currency_conv_dic = {
         "AZN": 35.68, "BYR": 23.91, "EUR": 59.90, "GEL": 21.74, "KGS": 0.76,
         "KZT": 0.13, "RUR": 1, "UAH": 1.64, "USD": 60.66, "UZS": 0.0055,
     }
 
     def __init__(self, vacancy):
+        """
+        Инициализирует объект вакансий из словаря
+
+        Args:
+            vacancy (object): Объект вакансии
+        """
         self.name = vacancy['name']
         self.salary_currency = vacancy['salary_currency']
         self.salary_from = int(float(vacancy['salary_from']))
@@ -27,12 +45,30 @@ class Vacancy:
 
 
 class DataSet:
+    """
+    Класс для получения данных из файла CSV.
+
+    Attributes:
+        file_name (str): Название файла с форматом CSV
+        vacancy_name (object): Вакансии
+    """
     def __init__(self, name, vacancy):
+        """
+        Инициализирует объект DataSet
+
+        Attributes:
+            name (str): Название файла с форматом CSV
+            vacancy (object): Вакансии
+        """
         self.file_name = name
         self.vacancy_name = vacancy
 
     @staticmethod
     def get_average_sum_by_dic(dic):
+        """
+        Возвращает словарь - из средних значений другого словаря.
+        :param dic: Словарь
+        """
         temp = {}
         for k, v in dic.items():
             temp[k] = int(sum(v) / len(v))
@@ -40,12 +76,23 @@ class DataSet:
 
     @staticmethod
     def increase_value(dic, k, v):
+        """
+        Увеличивает значение по ключу в словаре, или создаёт новый ключ, если его не было.
+        :param dic: Словарь
+        :param k: Ключ
+        :param v: Значение
+        """
         if k in dic:
             dic[k] += v
         else:
             dic[k] = v
 
     def csv_reader(self):
+        """
+        Читает файл с расширением CSV и создаёт лист с вакансиями
+        :return:
+            list: Лист с вакансиями
+        """
         with open(self.file_name, encoding='utf-8-sig') as file:
             csv_file = csv.reader(file)
             fields = next(csv_file)
@@ -55,6 +102,9 @@ class DataSet:
                     yield dict(zip(fields, element))
 
     def get_statistic(self):
+        """
+        Форматирование данных о вакансиях
+        """
         salary = {}
         area_salary = {}
         salary_of_vac = {}
@@ -80,6 +130,9 @@ class DataSet:
         return stats, num_vac, s1, name_num_vac, s3, s5
 
     def statistics_helper(self, area_salary, counter, salary, salary_of_vac):
+        """
+        Вспомогательный метод для форматирования данных о вакансии
+        """
         for vac_dic in self.csv_reader():
             vac = Vacancy(vac_dic)
             self.increase_value(salary, vac.year, [vac.salary_average])
@@ -96,6 +149,9 @@ class DataSet:
 
     @staticmethod
     def print_statistic(s1, s2, s3, s4, s5, s6):
+        """
+        Печатает статистику по вакансиям.
+        """
         print('Динамика уровня зарплат по годам: {0}'.format(s1))
         print('Динамика количества вакансий по годам: {0}'.format(s2))
         print('Динамика уровня зарплат по годам для выбранной профессии: {0}'.format(s3))
@@ -105,6 +161,10 @@ class DataSet:
 
 
 class InputConnect:
+    """
+    Обрабатывает параметры вводимые пользователями.
+    Создаётся таблица, изображение, пдф-отчёт.
+    """
     def __init__(self):
         self.name = input('Введите название файла: ')
         self.vacancy = input('Введите название профессии: ')
@@ -126,6 +186,9 @@ class Report:
         self.book = openpyxl.Workbook()
 
     def generate_excel(self):
+        """
+        Создаёт файл с расширением XLSX с наименованием report.xslx
+        """
         first = self.book.active
         first.append(['Год', 'Средняя зарплата', 'Средняя зарплата - ' + self.vacancy, 'Количество вакансий',
                       'Количество вакансий - ' + self.vacancy])
@@ -184,10 +247,16 @@ class Report:
                 first[e + str(element + 1)].border = temp_border
 
     def year_creator(self, first):
+        """
+        Перечисляет года для вакансии и добавляет их в лист
+        """
         for year in self.s1.keys():
             first.append([year, self.s1[year], self.s3[year], self.s2[year], self.s4[year]])
 
     def generate_image(self):
+        """
+        Создаёт изображение с форматом png с графиками по статистике вакансий.
+        """
         not_need, ((a, b), (c, d)) = mat.subplots(ncols=2, nrows=2)
         self.first_graph(a)
         self.second_graph(b)
@@ -198,11 +267,17 @@ class Report:
         mat.savefig('graph.png')
 
     def fourth_graph(self, d):
+        """
+        Дополнительный метод для разбиения создания различных графиков. Этот используется для четвёртого.
+        """
         d.set_title('Доля вакансий по городам', fontdict={'fontsize': 8})
         temp = 1 - sum([value for value in self.s6.values()])
         d.pie(list(self.s6.values()) + [temp], labels=list(self.s6.keys()) + ['Другие'], textprops={'fontsize': 6})
 
     def third_graph(self, c):
+        """
+        Дополнительный метод для разбиения создания различных графиков. Этот используется для третьего.
+        """
         c.set_title('Уровень зарплат по городам', fontdict={'fontsize': 8})
         c.barh(list([str(a).replace(' ', '\n').replace('-', '-\n') for a in reversed(list(self.s5.keys()))]),
                list(reversed(list(self.s5.values()))), color='blue', height=0.5, align='center')
@@ -211,6 +286,9 @@ class Report:
         c.grid(axis='x')
 
     def second_graph(self, b):
+        """
+        Дополнительный метод для разбиения создания различных графиков. Этот используется для второго.
+        """
         b.set_title('Количество вакансий по годам', fontdict={'fontsize': 8})
         bar1 = b.bar(np.array(list(self.s2.keys())) - 0.4, self.s2.values(), width=0.4)
         bar2 = b.bar(np.array(list(self.s2.keys())), self.s4.values(), width=0.4)
@@ -222,6 +300,9 @@ class Report:
         b.yaxis.set_tick_params(labelsize=8)
 
     def first_graph(self, a):
+        """
+        Дополнительный метод для разбиения создания различных графиков. Этот используется для первого.
+        """
         bar1 = a.bar(np.array(list(self.s1.keys())) - 0.4, self.s1.values(), width=0.4)
         bar2 = a.bar(np.array(list(self.s1.keys())), self.s3.values(), width=0.4)
         a.set_title('Уровень зарплат по годам', fontdict={'fontsize': 8})
@@ -232,9 +313,16 @@ class Report:
         a.yaxis.set_tick_params(labelsize=8)
 
     def save(self, filename):
+        """
+        Сохраняет WorkBook
+        :param filename: Именование файла для сохранения
+        """
         self.book.save(filename=filename)
 
     def generate_pdf(self):
+        """
+        Создаёт файл с расширением .pdf и включает в себя таблицы, изображения графиков.
+        """
         env = Environment(loader=FileSystemLoader('.'))
         template = env.get_template("pdf_template.html")
         stats = []
@@ -243,10 +331,6 @@ class Report:
 
         for key in self.s6:
             self.s6[key] = round(self.s6[key] * 10 * 10, 2)
-
-        pdf_template = template.render(
-            {'name': self.vacancy, 'image_file': 'graph.png',
-             'stats': stats, 'stats5': self.s5, 'stats6': self.s6})
 
         pdf_template = template.render(
             {'name': self.vacancy, 'path': '{0}/{1}'.format(pathlib.Path(__file__).parent.resolve(), 'graph.png'),

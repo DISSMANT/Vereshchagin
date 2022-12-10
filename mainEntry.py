@@ -1,4 +1,4 @@
-input_value = input('В asd или C: ')
+input_value = input('Вакансии или Cтатистика: ')
 
 if input_value == 'Вакансии':
     import statisticsChart
